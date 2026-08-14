@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - GESTÃO DE COMPRAS | Grupo Zanol & Thomaz</title>
+    <!-- Link para o arquivo CSS externo -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- TELA DE LOGIN OVERLAY -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card">
+            <h2>📊 Grupo Zanol & Thomaz</h2>
+            <p>Painel de Análise - Estoque Parado</p>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" placeholder="Digite seu usuário" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" placeholder="Digite sua senha" required>
+                </div>
+                <button type="submit" class="login-btn">Acessar Sistema</button>
+                <div class="login-error" id="loginError" style="display: none;">Usuário ou senha incorretos!</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>GESTÃO DE COMPRAS</h2>
+        
+        <div class="sidebar-section">Análise Detalhada</div>
+        <button class="nav-btn active" onclick="openTab('visao-geral', this)">Visão Geral</button>
+        <button class="nav-btn" onclick="openTab('visao-setor', this)">Visão Setor</button>
+        <button class="nav-btn" onclick="openTab('visao-unidade', this)">Visão Unidade</button>
+        <button class="nav-btn" onclick="openTab('fabricante', this)">Fabricante</button>
+        <button class="nav-btn" onclick="openTab('produto', this)">Produto</button>
+        <button class="nav-btn" onclick="openTab('rastreio', this)">Rastreio</button>
+        <button class="nav-btn" onclick="openTab('previsao', this)">Previsão</button>
+        
+        <div class="sidebar-section">Resultados</div>
+        <button class="nav-btn" onclick="openTab('resultado-comprador', this)">Resultado Comprador</button>
+        <button class="nav-btn" onclick="openTab('ranking-lojas', this)">Ranking Lojas</button>
+        
+        <button class="nav-btn logout-btn" onclick="handleLogout()" style="margin-top: auto; color: #f87171;">🚪 Sair</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" style="flex: 1; padding: 25px; overflow-y: auto;">
+        
+        <!-- PAINEL DE FILTROS AVANÇADO -->
+        <div class="pbi-filter-panel" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; background: var(--card-bg, #fff); padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <div class="filter-group" style="flex: 1; min-width: 200px;">
+                <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; font-weight: 600;">Filtrar por Status</label>
+                <select id="filter-status" class="filter-select" onchange="applyFilters()" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                    <option value="TODAS">Todos os Registros</option>
+                    <option value="Positivo">Evolução Positiva (Queda de Estoque)</option>
+                    <option value="Negativo">Evolução Negativa (Aumento de Estoque)</option>
+                </select>
+            </div>
+
+            <div class="filter-group" style="flex: 2; min-width: 250px;">
+                <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; font-weight: 600;">Busca Rápida Dinâmica</label>
+                <input type="text" id="filter-search" class="filter-input" placeholder="Digite SKU, loja, fabricante, comprador..." onkeyup="handleSearchInput()" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+            </div>
+
+            <div class="filter-actions" style="display: flex; gap: 10px;">
+                <button class="btn-reset" onclick="resetFilters()" style="padding: 9px 15px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Limpar Filtros</button>
+                <button class="btn-export" onclick="exportData()" style="padding: 9px 15px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">📥 Exportar</button>
+            </div>
+            
+            <div id="filter-counter" style="width: 100%; font-size: 0.75rem; color: #64748b; margin-top: -5px;">
+                Exibindo todos os registros disponíveis na guia ativa.
+            </div>
+        </div>
+
+        <!-- GUIA 1: VISÃO GERAL -->
+        <div id="visao-geral" class="tab-content active">
+            <div class="card">
+                <h3>Visão Geral - Consolidado de Estoque Parado</h3>
+                <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 5px;">Panorama executivo global da imobilização de capital.</p>
+                <div class="table-responsive" style="margin-top: 15px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Indicador Geral</th>
+                                <th>Valor Atual</th>
+                                <th>Meta</th>
+                                <th>Tendência</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-search="geral total capital" data-status="Positivo">
+                                <td><strong>Capital Imobilizado Total</strong></td>
+                                <td>R$ 1.250.000</td>
+                                <td>R$ 1.100.000</td>
+                                <td><span class="badge bg-success">▼ -5.2% no mês</span></td>
+                            </tr>
+                            <tr data-search="geral skus parados" data-status="Positivo">
+                                <td><strong>Total de SKUs Parados</strong></td>
+                                <td>1.420 itens</td>
+                                <td>1.200 itens</td>
+                                <td><span class="badge bg-success">▼ Queda consistente</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- GUIA 2: VISÃO SETOR -->
+        <div id="visao-setor" class="tab-content">
+            <div class="card">
+                <h3>Visão por Setor / Categoria</h3>
+                <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 5px;">Desmobilização agrupada por grandes setores de mercadoria.</p>
+                <div class="table-responsive" style="margin-top: 15px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Setor</th>
+                                <th>Qtd Itens Parados</th>
+                                <th>Valor Imobilizado</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-search="mercearia" data-status="Positivo">
+                                <td><strong>Mercearia</strong></td>
+                                <td>450</td>
+                                <td>R$ 320.000</td>
+                                <td><span class="badge bg-success">Em desmobilização</span></td>
+                            </tr>
+                            <tr data-search="limpeza" data-status="Negativo">
+                                <td><strong>Limpeza</strong></td>
+                                <td>310</td>
+                                <td>R$ 280.000</td>
+                                <td><span class="badge bg-danger">Aumento de estoque</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- GUIA 3: VISÃO UNIDADE -->
+        <div id="visao-unidade" class="tab-content">
+            <div class="card">
+                <h3>Visão por Unidade / Loja</h3>
+                <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 5px;">Análise detalhada por filial da rede.</p>
+                <div class="table-responsive" style="margin-top: 15px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Unidade</th>
+                                <th>Capital Parado Anterior</th>
+                                <th>Capital Parado Atual</th>
+                                <th>Evolução</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-search="loja 01 filial" data-status="Positivo">
+                                <td><strong>Loja 01</strong></td>
+                                <td>R$ 180.000</td>
+                                <td>R$ 135.000</td>
+                                <td><span class="badge bg-success">-25% (Queda)</span></td>
+                            </tr>
+                            <tr data-search="loja 02 filial" data-status="Negativo">
+                                <td><strong>Loja 02</strong></td>
+                                <td>R$ 150.000</td>
+                                <td>R$ 162.500</td>
+                                <td><span class="badge bg-danger">+8% (Aumento)</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- GUIA 4: FABRICANTE -->
+        <div id="fabricante" class="tab-content">
+            <div class="card">
+                <h3>Análise por Fabricante</h3>
+                <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 5px;">Fornecedores com maior volume de estoque sem giro.</p>
+                <div class="table-responsive" style="margin-top: 15px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Fabricante / Fornecedor</th>
+                                <th>Qtd SKUs</th>
+                                <th>Valor Total</th>
+                                <th>Ação Recomendada</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-search="panpharma fornecedor" data-status="Positivo">
+                                <td><strong>Panpharma</strong></td>
+                                <td>85</td>
+                                <td>R$ 145.000</td>
+                                <td><span class="badge bg-warning">Negociar Devolução</span></td>
+                            </tr>
+                            <tr data-search="unilever fornecedor" data-status="Positivo">
+                                <td><strong>Unilever</strong></td>
+                                <td>120</td>
+                                <td>R$ 95.000</td>
+                                <td><span class="badge bg-success">Campanha de Giro</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- GUIA 5: PRODUTO -->
+        <div id="produto" class="tab-content">
+            <div class="card">
+                <h3>Detalhamento por Produto (SKU)</h3>
+                <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 5px;">Itens específicos identificados no estoque parado.</p>
+                <div class="table-responsive" style="margin-top: 15px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Código SKU</th>
+                                <th>Descrição do Produto</th>
+                                <th>Dias Parado</th>
+                                <th>Valor Imobilizado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-search="sku-789100 alfa a" data-status="Negativo">
+                                <td>SKU-789100</td>
+                                <td>Produto Exemplo Alfa A</td>
+                                <td>145 dias</td>
+                                <td>R$ 12.400</td>
+                            </tr>
+                            <tr data-search="sku-789200 beta b" data-status="Positivo">
+                                <td>SKU-789200</td>
+                                <td>Produto Exemplo Beta B</td>
+                                <td>90 dias</td>
+                                <td>R$ 8.100</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- GUIA 6: RASTREIO -->
+        <div id="rastreio" class="tab-content">
+            <div class="card">
+                <h3>Rastreio de Lotes e Documentos</h3>
+                <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 5px;">Auditoria de notas fiscais e entradas vinculadas ao estoque parado.</p>
+                <div class="table-responsive" style="margin-top: 15px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nota Fiscal (NF)</th>
+                                <th>Fornecedor</th>
+                                <th>Data de Entrada</th>
+                                <th>Status Rastreio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-search="nf 45892 panpharma" data-status="Positivo">
+                                <td>NF 45892</td>
+                                <td>Panpharma</td>
+                                <td>15/02/2026</td>
+                                <td><span class="badge bg-success">Auditado e Regular</span></td>
+                            </tr>
+                            <tr data-search="nf 46102 distribuidora alpha" data-status="Negativo">
+                                <td>NF 46102</td>
+                                <td>Distribuidora Alpha</td>
+                                <td>10/01/2026</td>
+                                <td><span class="badge bg-danger">Divergência de Termos</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- GUIA 7: PREVISÃO -->
+        <div id="previsao" class="tab-content">
+            <div class="card">
+                <h3>Previsão de Desmobilização (Projeção)</h3>
+                <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 5px;">Projeção de recuperação de capital para os próximos meses.</p>
+                <div class="table-responsive" style="margin-top: 15px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Mês Projeção</th>
+                                <th>Meta de Redução</th>
+                                <th>Capital Esperado Liberado</th>
+                                <th>Confiabilidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-search="maio 2026" data-status="Positivo">
+                                <td>Maio / 2026</td>
+                                <td>10%</td>
+                                <td>R$ 125.000</td>
+                                <td><span class="badge bg-success">Alta</span></td>
+                            </tr>
+                            <tr data-search="junho 2026" data-status="Positivo">
+                                <td>Junho / 2026</td>
+                                <td>15%</td>
+                                <td>R$ 187.500</td>
+                                <td><span class="badge bg-warning">Média</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- GUIA 8: RESULTADO COMPRADOR -->
+        <div id="resultado-comprador" class="tab-content">
+            <div class="card">
+                <h3>Resultado por Comprador</h3>
+                <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 5px;">Eficiência da equipe de compras na gestão de categorias paradas.</p>
+                <div class="table-responsive" style="margin-top: 15px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Comprador Responsável</th>
+                                <th>Categorias Gerenciadas</th>
+                                <th>Evolução do Valor (R$)</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-search="marcos vinicius" data-status="Positivo">
+                                <td><strong>Marcos Vinicius</strong></td>
+                                <td>45</td>
+                                <td><span class="badge bg-success">- R$ 85.000 (▼ 22%)</span></td>
+                                <td>⭐ Excelente</td>
+                            </tr>
+                            <tr data-search="ana julia" data-status="Positivo">
+                                <td><strong>Ana Julia</strong></td>
+                                <td>32</td>
+                                <td><span class="badge bg-success">- R$ 34.000 (▼ 14%)</span></td>
+                                <td>⭐ Muito Bom</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- GUIA 9: RANKING LOJAS -->
+        <div id="ranking-lojas" class="tab-content">
+            <div class="card">
+                <h3>Ranking de Lojas - Desmobilização</h3>
+                <div class="podium-container" id="podium-box" style="display: flex; justify-content: center; gap: 20px; margin: 20px 0;">
+                    <div class="podium-step podium-2" data-search="loja 04" data-status="Positivo" style="text-align: center;">
+                        <div class="podium-info"><strong>Loja 04</strong><br><span>▼ 18%</span></div>
+                        <div class="podium-block" style="background: #e2e8f0; padding: 15px; border-radius: 4px; margin-top: 5px;">2º</div>
+                    </div>
+                    <div class="podium-step podium-1" data-search="loja 01" data-status="Positivo" style="text-align: center;">
+                        <div class="podium-info"><strong>Loja 01</strong><br><span>▼ 25%</span></div>
+                        <div class="podium-block" style="background: #fef08a; padding: 25px; border-radius: 4px; margin-top: 5px;">1º</div>
+                    </div>
+                    <div class="podium-step podium-3" data-search="loja 07" data-status="Positivo" style="text-align: center;">
+                        <div class="podium-info"><strong>Loja 07</strong><br><span>▼ 12%</span></div>
+                        <div class="podium-block" style="background: #fed7aa; padding: 10px; border-radius: 4px; margin-top: 5px;">3º</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <h3>Tabela Consolidada de Ranking</h3>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Posição</th>
+                                <th>Loja</th>
+                                <th>Valor Evoluído (R$)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-search="loja 01 1º" data-status="Positivo">
+                                <td>1º</td>
+                                <td><strong>Loja 01</strong></td>
+                                <td><span class="badge bg-success">- R$ 45.000 (▼ 25%)</span></td>
+                                <td>Excelente</td>
+                            </tr>
+                            <tr data-search="loja 04 2º" data-status="Positivo">
+                                <td>2º</td>
+                                <td><strong>Loja 04</strong></td>
+                                <td><span class="badge bg-success">- R$ 28.300 (▼ 18%)</span></td>
+                                <td>Muito Bom</td>
+                            </tr>
+                            <tr data-search="loja 02 3º" data-status="Negativo">
+                                <td>3º</td>
+                                <td><strong>Loja 02</strong></td>
+                                <td><span class="badge bg-danger">+ R$ 12.500 (▲ 8%)</span></td>
+                                <td>Requer Atenção</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT DE NAVEGAÇÃO E FILTROS DINÂMICOS -->
+    <script>
+        function handleLogin(event) {
+            event.preventDefault();
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const errorMsg = document.getElementById('loginError');
+
+            if (user === 'admin' && pass === '1234') {
+                document.getElementById('loginOverlay').style.display = 'none';
+                errorMsg.style.display = 'none';
+            } else {
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        function handleLogout() {
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginOverlay').style.display = 'flex';
+        }
+
+        function openTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+            
+            // Reaplica os filtros atuais ao trocar de aba para manter consistência
+            applyFilters();
+        }
+
+        let debounceTimer;
+
+        function handleSearchInput() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                applyFilters();
+            }, 250);
+        }
+
+        function applyFilters() {
+            const statusFilter = document.getElementById('filter-status').value;
+            const searchText = document.getElementById('filter-search').value.toLowerCase().trim();
+
+            const activeTab = document.querySelector('.tab-content.active');
+            if (!activeTab) return;
+
+            // Filtra linhas de tabelas
+            const rows = activeTab.querySelectorAll('tbody tr');
+            let visibleRowsCount = 0;
+            let totalRowsCount = rows.length;
+
+            rows.forEach(row => {
+                const searchData = row.getAttribute('data-search') || '';
+                const statusData = row.getAttribute('data-status') || '';
+                const rowText = row.innerText.toLowerCase();
+
+                const matchesStatus = (statusFilter === 'TODAS' || statusData === statusFilter);
+                const matchesSearch = (searchText === '' || searchData.includes(searchText) || rowText.includes(searchText));
+
+                if (matchesStatus && matchesSearch) {
+                    row.style.display = '';
+                    visibleRowsCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Filtro dinâmico também para elementos visuais específicos (como o pódio no ranking)
+            const podiumSteps = activeTab.querySelectorAll('.podium-step');
+            podiumSteps.forEach(step => {
+                const searchData = step.getAttribute('data-search') || '';
+                const statusData = step.getAttribute('data-status') || '';
+                const stepText = step.innerText.toLowerCase();
+
+                const matchesStatus = (statusFilter === 'TODAS' || statusData === statusFilter);
+                const matchesSearch = (searchText === '' || searchData.includes(searchText) || stepText.includes(searchText));
+
+                if (matchesStatus && matchesSearch) {
+                    step.style.display = '';
+                } else {
+                    step.style.display = 'none';
+                }
+            });
+
+            // Atualiza o contador informativo na barra de filtros
+            const counterEl = document.getElementById('filter-counter');
+            if (counterEl) {
+                counterEl.innerText = `Mostrando ${visibleRowsCount} de ${totalRowsCount} registros filtrados na guia atual.`;
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-status').value = 'TODAS';
+            document.getElementById('filter-search').value = '';
+            applyFilters();
+        }
+
+        function exportData() {
+            alert('Função de exportação rápida acoplada com sucesso! Pronto para integrar com a lógica de backend ou geração de CSV.');
+        }
+    </script>
+</body>
+</html>
