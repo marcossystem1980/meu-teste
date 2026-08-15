@@ -161,7 +161,14 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: var(--primary);
+    
+    /* AS MUDANÇAS ENTRAM AQUI: */
+    background-color: var(--primary); /* Cor de fundo caso a imagem demore a carregar */
+    background-image: url('img/o.png'); /* ⚠️ Mude o nome do arquivo aqui! */
+    background-size: cover; /* Faz a imagem cobrir a tela toda */
+    background-position: center; /* Centraliza a imagem */
+    background-repeat: no-repeat; /* Evita repetição */
+    
     display: flex;
     justify-content: center;
     align-items: center;
