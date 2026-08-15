@@ -177,7 +177,7 @@ body {
 }
     /* AS MUDANÇAS ENTRAM AQUI: */
     background-color: var(--primary); /* Cor de fundo caso a imagem demore a carregar */
-    background-image: url('../../img/fundo.png'); /* ⚠️ Mude o nome do arquivo aqui! */
+    background-image: url('../img/fundo.png'); /* ⚠️ Mude o nome do arquivo aqui! */
     background-size: cover; /* Faz a imagem cobrir a tela toda */
     background-position: center; /* Centraliza a imagem */
     background-repeat: no-repeat; /* Evita repetição */
