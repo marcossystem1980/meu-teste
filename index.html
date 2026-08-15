@@ -10,11 +10,15 @@
 <body>
 
     <!-- TELA DE LOGIN OVERLAY -->
-    <div class="login-overlay" id="loginOverlay">
+<div class="login-overlay" id="loginOverlay">
+    <!-- WRAPPER PARA EMPILHAR O LOGO E O CARTÃO -->
+    <div class="login-wrapper">
+        <img src="../img/logo grupo.png" alt="Logo do Grupo" class="login-logo-external">
+        
         <div class="login-card">
             <h2>GESTÃO DE COMPRAS</h2>
             <p>Painel de Análise - Estoque Parado</p>
-            <form class="login-form" onsubmit="handleLogin(event)">
+            <form class="login-form" onSubmit="handleLogin(event)">
                 <div class="form-group">
                     <label for="username">Usuário</label>
                     <input type="text" id="username" placeholder="Digite seu usuário" required>
