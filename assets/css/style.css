@@ -162,7 +162,7 @@ body {
     width: 100vw;
     height: 100vh;
     background-color: var(--primary);
-    background-image: url('../imagem/fundo.png') !important;
+    background-image: url('../img/fundo.png') !important;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
