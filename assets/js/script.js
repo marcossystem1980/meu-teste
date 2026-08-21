@@ -23,21 +23,29 @@ function handleLogout() {
   const overlay = document.getElementById('loginOverlay');
   overlay.style.visibility = 'visible';
   overlay.style.opacity = '1';
-  
-  // Garante que ao deslogar a tela volte para o Painel Inicial
-  openTab('painel-inicial', document.querySelector('.nav-btn'));
 }
 
-// --- CONTROLE DE NAVEGAÇÃO DE ABAS ---
-function openTab(tabId, element) {
-  // Remove classe ativa de todas as abas e botões
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+// --- LÓGICA DO PARALLAX FLUIDO NO PAINEL ---
+const dashboardContainer = document.querySelector('.dashboard-container');
+const parallaxBg = document.getElementById('parallaxBg');
+
+if (dashboardContainer && parallaxBg) {
+  let speed = 0.1; // Velocidade do movimento
   
-  // Adiciona classe ativa na aba e botão selecionados
-  const targetTab = document.getElementById(tabId);
-  if (targetTab) {
-    targetTab.classList.add('active');
-    element.classList.add('active');
+  function updateParallax() {
+    // Pega a rolagem específica de dentro do container do painel
+    const scrollTop = dashboardContainer.scrollTop;
+    parallaxBg.style.transform = `translate3d(0, ${scrollTop * speed}px, 0)`;
   }
+  
+  let ticking = false;
+  dashboardContainer.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        updateParallax();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
 }
